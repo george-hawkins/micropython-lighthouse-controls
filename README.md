@@ -49,7 +49,11 @@ Pololu offer similar motors with more appropriate gear ratios (no-load current s
 
 Maybe, a pulldown resistor on the Pixie data wire and direct control of the SLP pin on the driver by the ESP32 (also with pulldown resistor) would have been a good idea for a defined state when the ESP32 itself is turned off.
 
-TODO: add off button to UI.
+TODO
+----
+
+Buy 2 x https://www.reichelt.com/ch/de/raspberry-pi-kabel-mit-schalter-30-cm-schwarz-rpi-cable-sw-30-p223610.html
+And another power adapter.
 
 Motor frequency and duty values
 -------------------------------
@@ -84,6 +88,11 @@ Note: one UART is definitely used for the UART to USB bridge but it may be that 
 
 I chose pins 27 and 14 (which despite their numbers are beside each other on the board) for no particular. As I'm doing no receiving I've actually just left 14 floating but it might have been better to connect it to a pull-down resistor.
 
+Note: when you initialize a UART, the ESP32 often (but not always) outputs a console message like this:
+
+    I (7336) uart: ALREADY NULL
+
+This sounds like an error but appears to be of no particular importance.
 
 GitHub caching
 --------------

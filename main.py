@@ -2,6 +2,8 @@ import micropython
 import gc
 
 # Display memory available at startup.
+from message_extractor import Extractor
+
 gc.collect()
 micropython.mem_info()
 
@@ -16,6 +18,12 @@ print("WiFi is setup")
 # Display memory available once the WiFi setup process is complete.
 gc.collect()
 micropython.mem_info()
+
+# --------------------------------------------------------------------------------------
+
+import logging
+
+_logger = logging.getLogger("main")
 
 # --------------------------------------------------------------------------------------
 
@@ -102,7 +110,8 @@ def process(line):
                 _color[i] = int(words[i + 1])
             _refresh_color()
         else:
-            print("Ignoring: {}".format(line))
+            # `repr` converts non-printing characters to hex escapes or '\n' etc.
+            print("Ignoring: {}".format(repr(line)))
     except Exception as e:
         sys.print_exception(e)
 
@@ -119,10 +128,61 @@ _schedule = Scheduler()
 
 _schedule.every(_REFRESH_DELAY).seconds.do(_refresh_color)
 
+# ----------------------------------------------------------------------
+
 import socket
 import websocket
 
 clients = {}
+
+def pump_ws_clients(s, event):
+    if not isinstance(s, socket.socket):
+        return
+    fileno = s.fileno()
+    if fileno not in clients:
+        return
+    if event != select.POLLIN:
+        _logger.warning("unexpected event {} on socket {}".format(event, fileno))
+        remove_ws_client(fileno)
+        return
+    ws_client = clients[fileno]
+    try:
+        message = ws_client.nextMessage()
+    except Exception as e:
+        sys.print_exception(e)
+        remove_ws_client(fileno)
+        return
+    if message:
+        print(message)
+        process(message)
+
+def remove_ws_client(fileno):
+    clients.pop(fileno).close(poller)
+
+def add_ws_client(client_socket):
+    ws_client = WsClient(poller, client_socket)
+    clients[ws_client.fileno] = ws_client
+
+
+class WsClient:
+    def __init__(self, poller, client_socket):
+        self._socket = client_socket
+        self._ws = websocket.websocket(client_socket, True)
+        self.fileno = client_socket.fileno()
+        # poller.register doesn't complain if you register ws but it fails when you call ipoll.
+        poller.register(client_socket, select.POLLIN | select.POLLERR | select.POLLHUP)
+        self._extractor = Extractor()
+
+    def close(self, poller):
+        poller.unregister(self._socket)
+        try:
+            self._ws.close()
+        except:
+            pass
+
+    def nextMessage(self):
+        return self._extractor.consume(self._ws.readinto)
+
 
 # ----------------------------------------------------------------------
 
@@ -152,15 +212,9 @@ class DummySocket:
     def close(self):
         pass
 
-def register(client_socket):
-    ws = websocket.websocket(client_socket, True)
-    # poller.register doesn't complain if you register ws but it fails when you call ipoll.
-    poller.register(client_socket, select.POLLIN)
-    clients[client_socket.fileno()] = ws
-
 # Called once the response has been sent.
 def onDataSent(xasCli, _):
-    register(xasCli._socket)
+    add_ws_client(xasCli._socket)
     xasCli._socket = DummySocket()
     xasCli.Close()
 
@@ -185,14 +239,7 @@ slim_server.add_module(WebRouteModule([
 
 while True:
     for (s, event) in poller.ipoll(0):
-        if isinstance(s, socket.socket) and s.fileno() in clients:
-            ws = clients[s.fileno()]
-            # TODO: if socket dies then this line will blow out the whole loop.
-            line = ws.readline().decode("utf-8")
-            line = line.strip('"')  # TODO: why is remote end wrapping string in double-quote characters?
-            print(line)
-            process(line)
-        else:
-            slim_server.pump(s, event)
+        pump_ws_clients(s, event)
+        slim_server.pump(s, event)
     slim_server.pump_expire()
     _schedule.run_pending()
