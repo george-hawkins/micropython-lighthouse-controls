@@ -1,0 +1,2 @@
+#!/bin/bash
+MICROPYPATH=..:../lib micropython message_extractor_test.py
