@@ -24,43 +24,11 @@ import time
 import select
 import sys
 
+# A1N1 and A1N2 are the names of the relevant pins on the Adafruit DRV8833 motor driver breakout.
 a1n1 = machine.PWM(machine.Pin(25))
 a1n2 = machine.PWM(machine.Pin(26))
 
-# The minimum duty cycle and optimum frequency were found by experimentation.
-# For the Adafruit 200RPM DC gearbox motor - https://www.adafruit.com/product/3777 - the results were:
-# * The duty value needs to be 240 or above for the motor to turn.
-# * At this value the motor turns fastest with a frequency of about 100Hz.
-#
-# You can't find the duty and frequency values independently, e.g. if you fix the frequency high and adjust
-# the duty value, you'll end up with a much higher minimum duty value than if you fix the frequency low.
-#
-# Ideally, you'd use a quadrature encoder to measure the turning speed. I just used slow motion mode
-# on my smartphone camera, captured about 5 seconds of video at various frequencies and counted the rotations.
-#
-# If you set the frequency very low, e.g. 10, the motor clearly judders on and off.
-# So for a smooth motion it would seem obvious to set the frequency as high as possible.
-# However, with the duty value at 300 the motor barely turns at a frequency above 2KHz.
-# In fact the turning speed starts dropping gradually as you go above 100Hz.
-# For a _possible_ explanation see the "PWM Frequency" section in
-# https://www.rs-online.com/designspark/spinning-the-wheels-interfacing-pmdc-motors-to-a-microcontroller
-#
-# The power supply is 5V and the motors can handle up to 6V so we don't need to cap the duty value below
-# the maximum allowed value of 1023.
-
-# UART0 and UART1 are already used. UART2 is available but I always got a "Guru Meditation Error"
-# after a small amount of interaction with it if I used its default pins (tx=17, rx=16). However,
-# for whatever reason, everything works fine if I specify pretty much any other pins for tx and rx.
-# It seems to be a known issue that the default pins can be problematic - https://github.com/micropython/micropython/issues/4997
-
-# Misc for a simple digital pin:
-#     slp = machine.Pin(27, machine.Pin.OUT)
-#     slp.on()
-
-#
-# websocat ws://192.168.0.248:81
-#
-
+# See README for how `FREQUENCY` and duty values were arrived at.
 FREQUENCY = 100
 MIN_DUTY = 240
 MAX_DUTY = 1023
@@ -72,11 +40,12 @@ a1n2.freq(FREQUENCY)
 a1n1.duty(0)
 a1n2.duty(0)
 
+# --------------------------------------------------------------------------------------
+
 _speed = 0
 _dir = 1
 _pin = a1n1
-_color = bytearray(3)
-_color_mv = memoryview(_color)
+_color = memoryview(bytearray(3))
 
 
 def _reverse():
@@ -110,11 +79,12 @@ def _set_speed(new_speed):
     _speed = new_speed
 
 
+# See README for why the default tx and rx values for UART2 are overriden.
 pixie = machine.UART(2, tx=27, rx=14)
 
 
 def _refresh_color():
-    pixie.write(bytes(_color_mv))
+    pixie.write(bytes(_color))
 
 
 # Process user entered commands.
@@ -137,14 +107,7 @@ def process(line):
         sys.print_exception(e)
 
 
-def prompt():
-    print("$ ", end="")
-
-
 poller = select.poll()
-poller.register(sys.stdin, select.POLLIN)
-
-prompt()
 
 # The Pixie color values must be rewritten at least every 2 seconds otherwise it turns off.
 # This is to prevent it getting stuck bright (and hot) if the controlling board hangs.
@@ -158,19 +121,6 @@ _schedule.every(_REFRESH_DELAY).seconds.do(_refresh_color)
 
 import socket
 import websocket
-import websocket_helper
-
-#_LISTEN_MAX = 255
-#
-#server_socket = socket.socket()
-#
-#server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-#server_socket.bind(("", 81))
-#server_socket.listen(_LISTEN_MAX)
-#
-#poller.register(
-#    server_socket, select.POLLIN | select.POLLERR | select.POLLHUP
-#)
 
 clients = {}
 
@@ -183,8 +133,13 @@ import urequests as requests  # For some reason urequests isn't available direct
 
 slim_server = SlimServer(poller)
 
+from os import urandom
+from binascii import hexlify
+
 def request_index(request):
-    r = requests.get("https://george-hawkins.github.io/material-lighthouse-controls/")
+    uuid = hexlify(urandom(16)).decode()
+    # GitHub returns stale cached results unless we force things by appending a UUID.
+    r = requests.get("https://george-hawkins.github.io/material-lighthouse-controls/?{}".format(uuid))
     request.Response.ReturnOk(r.text)
     r.close()
 
@@ -230,26 +185,11 @@ slim_server.add_module(WebRouteModule([
 
 while True:
     for (s, event) in poller.ipoll(0):
-        if s == sys.stdin:
-            line = sys.stdin.readline()
-            print(line)
-            process(line)
-            prompt()
-#        elif s == server_socket:
-#            if event == select.POLLIN:
-#                client_socket, client_addr = server_socket.accept()
-#                print("Received connection from {}".format(client_addr))
-#                websocket_helper.server_handshake(client_socket)
-#                ws = websocket.websocket(client_socket, True)
-#                print(dir(ws))
-#                # poller.register doesn't complain if you register ws but it fails when you call ipoll.
-#                poller.register(client_socket, select.POLLIN)
-#                clients[client_socket.fileno()] = ws
-#            else:
-#                print("Got {} event on server socket".format(event))
-        elif isinstance(s, socket.socket) and s.fileno() in clients:
+        if isinstance(s, socket.socket) and s.fileno() in clients:
             ws = clients[s.fileno()]
+            # TODO: if socket dies then this line will blow out the whole loop.
             line = ws.readline().decode("utf-8")
+            line = line.strip('"')  # TODO: why is remote end wrapping string in double-quote characters?
             print(line)
             process(line)
         else:
