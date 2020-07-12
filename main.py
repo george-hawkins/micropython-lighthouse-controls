@@ -120,7 +120,7 @@ def process(line):
         elif command == "c":
             global color
             for i in range(len(color)):
-                color[i] = bytes([int(words[i + 1])])
+                color[i] = int(words[i + 1])
             refresh_color()
         elif command == "p":
             machine.deepsleep()

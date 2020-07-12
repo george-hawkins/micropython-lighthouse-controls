@@ -18,6 +18,20 @@ Then create a Python venv and install [`rshell`](https://github.com/dhylands/rsh
     $ pip install --upgrade pip
     $ pip install rshell
 
+Then install everything on your board, start the REPL and then press the _EN_ or _reset_ button on your board:
+
+    $ rshell --buffer-size 512 --quiet -p $PORT
+    > mkdir /pyboard/lib
+    > cp -r lib/* /pyboard/lib
+    > cp main.py connect.py message_extractor.py /pyboard
+    > repl
+    ...
+    I (1567) cpu_start: Pro cpu start user code
+    ...
+    INFO:captive_portal:captive portal web server and DNS started on 192.168.4.1
+
+Then connect your device to your network as described in step 2 and onward [here](https://github.com/george-hawkins/micropython-wifi-setup/blob/master/docs/steps.md). At the end, instead of the cute little ghost placeholder, you should have the lighthouse UI open.
+
 ---
 
 `avahi-resolve` vs `dig -p 5353 @224.0.0.251` Server Fault question: <https://serverfault.com/q/1023994/282515>

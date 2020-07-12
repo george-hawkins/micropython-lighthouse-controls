@@ -12,11 +12,11 @@ class Extractor:
     _STX = 2
     _ETX = 3
 
-    def __init__(self, maxMessageLen=16):
-        self.maxMessageLen = maxMessageLen
+    def __init__(self, max_message_len=16):
+        self.max_message_len = max_message_len
 
-        bufferLen = maxMessageLen + 1
-        buffer = bytearray(bufferLen)
+        buffer_len = max_message_len + 1
+        buffer = bytearray(buffer_len)
 
         self._view = memoryview(buffer)
         self._offset = 0
