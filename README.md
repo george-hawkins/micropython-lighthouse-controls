@@ -1,12 +1,24 @@
 MicroPython lighthouse controls
 ===============================
 
+Basic setup
+-----------
+
+Clone this repo and the micropython-wifi-setup repo and link to its `lib` directory:
+
+    $ git clone git@github.com:george-hawkins/micropython-wifi-setup.git
+    $ git clone git@github.com:george-hawkins/micropython-lighthouse-controls.git
+    $ cd micropython-lighthouse-controls
     $ ln -s ../micropython-wifi-setup/lib .
+
+Then create a Python venv and install [`rshell`](https://github.com/dhylands/rshell):
 
     $ python3 -m venv env
     $ source env/bin/activate
     $ pip install --upgrade pip
     $ pip install rshell
+
+---
 
 `avahi-resolve` vs `dig -p 5353 @224.0.0.251` Server Fault question: <https://serverfault.com/q/1023994/282515>
 
@@ -136,3 +148,13 @@ For websocket experimentation, I used [`websocat`](https://github.com/vi/websoca
 Or:
 
     $ websocat ws://ding-5cd80b3.local/socket
+
+Black and flake8
+----------------
+
+`black` and `flake8` are used as following with the Python files in this project:
+
+    $ black *.py
+    $ flake8 *.py | fgrep -v -e E501 -e E203
+
+Note: `E501` and `E203` are simply rules that `black` and `flake8` disagree on.

@@ -9,7 +9,7 @@ from binascii import hexlify
 
 from slim.slim_server import SlimServer
 from slim.web_route_module import WebRouteModule, RegisteredRoute, HttpMethod
-from ws_manager import WsManager
+from slim.ws_manager import WsManager
 from message_extractor import Extractor
 from schedule import Scheduler
 from logging import getLogger
