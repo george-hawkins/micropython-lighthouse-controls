@@ -74,6 +74,7 @@ pin = a1n1
 
 # Functions for controlling the speed and direction of the motor.
 
+
 def speed_to_duty(speed):
     return int((MAX_DUTY - MIN_DUTY) * speed / 100 + MIN_DUTY)
 
@@ -103,6 +104,7 @@ def set_speed(new_speed):
     if new_speed == 0:
         pin.duty(0)
     speed = new_speed
+
 
 # ----------------------------------------------------------------------
 
@@ -139,6 +141,7 @@ ws_manager = WsManager(poller, extractor.consume, process)
 slim_server = SlimServer(poller)
 
 ROOT_URL = "https://george-hawkins.github.io/material-lighthouse-controls/"
+
 
 def request_index(request):
     uuid = hexlify(urandom(16)).decode()

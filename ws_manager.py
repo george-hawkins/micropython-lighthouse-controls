@@ -1,6 +1,7 @@
 import select
 import socket
 import sys
+import websocket
 
 from hashlib import sha1
 from binascii import b2a_base64
@@ -84,5 +85,5 @@ class _WsClient:
         poller.unregister(self._socket)
         try:
             self.ws.close()
-        except:
+        except:  # noqa: E722
             pass

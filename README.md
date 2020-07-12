@@ -55,6 +55,11 @@ TODO
 Buy 2 x https://www.reichelt.com/ch/de/raspberry-pi-kabel-mit-schalter-30-cm-schwarz-rpi-cable-sw-30-p223610.html
 And another power adapter.
 
+Tining wires
+------------
+
+The power wires are tinned on the ends that are soldered into the Pixie. They are *not* tinned on the ends that are inserted into the screw terminal block. It may seem convenient to tin the ends to stop the wire strands splaying out but for a clear explanation of why this is a bad idea, see [this](https://electronics.stackexchange.com/a/29862/27099) Electronics StackExchange answer and [this](https://reprap.org/wiki/Wire_termination_for_screw_terminals) RepRap wiki entry on the topic.
+
 Websocket closure
 -----------------
 

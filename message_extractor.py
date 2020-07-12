@@ -12,7 +12,7 @@ class Extractor:
     _STX = 2
     _ETX = 3
 
-    def __init__(self, maxMessageLen = 16):
+    def __init__(self, maxMessageLen=16):
         self.maxMessageLen = maxMessageLen
 
         bufferLen = maxMessageLen + 1
@@ -30,7 +30,7 @@ class Extractor:
 
         while not finished:
             free = len(self._view) - self._offset
-            count = readfn(self._view[self._offset:len(self._view)])
+            count = readfn(self._view[self._offset : len(self._view)])
 
             # Break on 0 or None (Stream.readline returns None when no data is available).
             if not count:
@@ -50,9 +50,11 @@ class Extractor:
                 c = self._view[i]
                 if c == self._STX:
                     # We discard all but the last message.
-                    _logger.warning("Discarding superseded data {}".format(bytes(self._view[0:i])))
+                    _logger.warning(
+                        "Discarding superseded data {}".format(bytes(self._view[0:i]))
+                    )
                     tmp = self._offset - i
-                    self._view[0:tmp] = self._view[i:self._offset]
+                    self._view[0:tmp] = self._view[i : self._offset]
                     self._offset = tmp
                     break
 
@@ -60,14 +62,20 @@ class Extractor:
             # If the buffer is full the message is invalidly long (irrespective of
             # whether the message is otherwise structuraly valid).
             if self._offset == len(self._view):
-                _logger.warning("Discarding oversized data {}".format(bytes(self._view)))
+                _logger.warning(
+                    "Discarding oversized data {}".format(bytes(self._view))
+                )
                 self._offset = 0
             elif self._view[0] != self._STX:
-                _logger.warning("Discarding invalid data {}".format(bytes(self._view[0:self._offset])))
+                _logger.warning(
+                    "Discarding invalid data {}".format(
+                        bytes(self._view[0 : self._offset])
+                    )
+                )
                 self._offset = 0
 
         if self._offset > 0 and self._view[self._offset - 1] == self._ETX:
-            message = str(self._view[1:(self._offset - 1)], "utf-8")
+            message = str(self._view[1 : (self._offset - 1)], "utf-8")
             self._offset = 0
             # Zero length messages can be used as low-level heartbeats that are always ignored.
             return message if len(message) > 0 else None

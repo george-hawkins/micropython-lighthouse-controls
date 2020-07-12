@@ -1,6 +1,7 @@
 import micropython
 import gc
 
+
 def connect():
     # Display memory available at startup.
     gc.collect()
@@ -17,3 +18,5 @@ def connect():
     # Display memory available once the WiFi setup process is complete.
     gc.collect()
     micropython.mem_info()
+
+    return sta
