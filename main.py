@@ -2,8 +2,6 @@ import micropython
 import gc
 
 # Display memory available at startup.
-from message_extractor import Extractor
-
 gc.collect()
 micropython.mem_info()
 
@@ -21,6 +19,7 @@ micropython.mem_info()
 
 # --------------------------------------------------------------------------------------
 
+from message_extractor import Extractor
 import logging
 
 _logger = logging.getLogger("main")
@@ -109,6 +108,8 @@ def process(line):
             for i in range(len(_color)):
                 _color[i] = int(words[i + 1])
             _refresh_color()
+        elif command == "p":
+            machine.deepsleep()
         else:
             # `repr` converts non-printing characters to hex escapes or '\n' etc.
             print("Ignoring: {}".format(repr(line)))

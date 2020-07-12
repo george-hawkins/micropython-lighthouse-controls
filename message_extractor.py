@@ -32,7 +32,8 @@ class Extractor:
             free = len(self._view) - self._offset
             count = readfn(self._view[self._offset:len(self._view)])
 
-            if count == 0:
+            # Break on 0 or None (Stream.readline returns None when no data is available).
+            if not count:
                 break
 
             # We're finished when we've clearly hit the end of all currently available data.
@@ -68,6 +69,7 @@ class Extractor:
         if self._offset > 0 and self._view[self._offset - 1] == self._ETX:
             message = str(self._view[1:(self._offset - 1)], "utf-8")
             self._offset = 0
-            return message
+            # Zero length messages can be used as low-level heartbeats that are always ignored.
+            return message if len(message) > 0 else None
         else:
             return None

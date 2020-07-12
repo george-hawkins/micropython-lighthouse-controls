@@ -55,6 +55,13 @@ TODO
 Buy 2 x https://www.reichelt.com/ch/de/raspberry-pi-kabel-mit-schalter-30-cm-schwarz-rpi-cable-sw-30-p223610.html
 And another power adapter.
 
+Websocket closure
+-----------------
+
+Surprisingly, the Angular web UI doesn't typically become aware of the remote end closing the websocket connection or at least it takes it a long time to notice. I added a heartbeat in the hope that actively trying to push data would trigger the lower level logic to notice any disconnect quicker but this didn't improve things.
+
+Instead of using `openObserver` and `closeObserver` with the RxJS `webSocket` function, I should move to having both sides sending a heartbeat and treat the failure to receive such heartbeats as a disconnect.
+
 Motor frequency and duty values
 -------------------------------
 

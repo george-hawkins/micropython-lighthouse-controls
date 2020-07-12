@@ -30,7 +30,6 @@ class TestHelper:
 
 
 helper = TestHelper()
-extractor = None
 
 
 # Use to simply test that extractor can still function even after testing problem cases.
@@ -46,7 +45,7 @@ data = b'\x02123456789012345\x03'
 assert len(data) == extractor.maxMessageLen + 1
 
 result = helper.process(extractor, data)
-assert result == None
+assert result is None
 
 ok()
 
@@ -57,7 +56,7 @@ data = b'\x021234567890123456789\x03'
 assert len(data) > extractor.maxMessageLen + 1
 
 result = helper.process(extractor, data)
-assert result == None
+assert result is None
 
 ok()
 
@@ -85,9 +84,16 @@ ok()
 # Test 6. message broken into two chunks by transmission.
 
 result = helper.process(extractor, b'\x0212')
-assert result == None
+assert result is None
 
 result = helper.process(extractor, b'34\x03')
 assert result == "1234"
+
+ok()
+
+# Test 6. empty messages are ignored (and can be used for low-level heartbeats).
+
+result = helper.process(extractor, b'\x02\x03')
+assert result is None
 
 ok()
