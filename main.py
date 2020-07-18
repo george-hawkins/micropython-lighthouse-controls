@@ -35,6 +35,12 @@ def refresh_color():
     pixie.write(bytes(color))
 
 
+def set_color(new_color):
+    assert len(new_color) == 3
+    color[:] = new_color
+    refresh_color()
+
+
 # The Pixie color values must be rewritten at least every 2 seconds otherwise it turns off.
 # This is to prevent it getting stuck bright (and hot) if the controlling board hangs.
 REFRESH_DELAY = 1  # 1s
@@ -118,10 +124,7 @@ def process(line):
         elif command == "r":
             reverse()
         elif command == "c":
-            global color
-            for i in range(len(color)):
-                color[i] = int(words[i + 1])
-            refresh_color()
+            set_color(bytes(map(int, words[1:4])))
         elif command == "p":
             machine.deepsleep()
         else:
