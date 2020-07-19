@@ -42,7 +42,7 @@ def ok():
 extractor = Extractor()
 data = b'\x02123456789012345\x03'
 
-assert len(data) == extractor.maxMessageLen + 1
+assert len(data) == extractor.max_message_len + 1
 
 result = helper.process(extractor, data)
 assert result is None
@@ -53,7 +53,7 @@ ok()
 
 data = b'\x021234567890123456789\x03'
 
-assert len(data) > extractor.maxMessageLen + 1
+assert len(data) > extractor.max_message_len + 1
 
 result = helper.process(extractor, data)
 assert result is None

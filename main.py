@@ -19,14 +19,15 @@ from connect import connect
 
 logger = getLogger("main")
 
+# Establish a WiFi connection using all the cleverness of https://github.com/george-hawkins/micropython-wifi-setup
 connect()
 
 # --------------------------------------------------------------------------------------
 
 # Setup the Adafruit Pixie.
 
-# See README for why the default tx and rx values for UART2 are overridden.
-pixie = machine.UART(2, tx=27, rx=14)
+# See docs/NOTES.md for why the default tx and rx values for UART1 are overridden.
+pixie = machine.UART(1, tx=27, rx=14)
 
 color = memoryview(bytearray(3))
 
@@ -98,7 +99,7 @@ def reverse():
 
 
 # Smoothly increase or decrease from current speed to new speed rather than juddering straight one to the other.
-# Changing from 0 to 100% takes about 1.5s, change _DELAY to increase or decrease this.
+# Changing from 0 to 100% takes about 1.5s, change `DELAY` to increase or decrease this.
 def set_speed(new_speed):
     assert 0 <= new_speed <= 100
     global speed
@@ -137,13 +138,12 @@ def process(line):
         sys.print_exception(e)
 
 
-poller = select.poll()
-
-extractor = Extractor()
-ws_manager = WsManager(poller, extractor.consume, process)
-
 # ----------------------------------------------------------------------
 
+# Set up the web server that serves out ROOT_URL as its main page and
+# which handles accepting websocket connections.
+
+poller = select.poll()
 slim_server = SlimServer(poller)
 
 ROOT_URL = "https://george-hawkins.github.io/material-lighthouse-controls/"
@@ -156,6 +156,9 @@ def request_index(request):
     request.Response.ReturnOk(r.text)
     r.close()
 
+
+extractor = Extractor()
+ws_manager = WsManager(poller, extractor.consume, process)
 
 # fmt: off
 slim_server.add_module(WebRouteModule([
