@@ -25,7 +25,7 @@ connect()
 
 # Setup the Adafruit Pixie.
 
-# See README for why the default tx and rx values for UART2 are overriden.
+# See README for why the default tx and rx values for UART2 are overridden.
 pixie = machine.UART(2, tx=27, rx=14)
 
 color = memoryview(bytearray(3))
@@ -57,12 +57,15 @@ a1n1 = machine.PWM(machine.Pin(25))
 a1n2 = machine.PWM(machine.Pin(26))
 
 # See README for how `FREQUENCY` and duty values were arrived at.
+# The motor will usually start at around 240 but this seems to depend on whether it's warmed up and other factors.
+# 270 is high enough that it almost always starts even at 1% speed.
 FREQUENCY = 100
-MIN_DUTY = 240
+MIN_DUTY = 270
 
 # The maximum value of 1023 is fine in terms of not exceeding the motor's maximum voltage.
 # However, it's far too high a maximum speed for what's supposed to be a lighthouse.
-MAX_DUTY = 255
+DUTY_RANGE = 200
+assert MIN_DUTY + DUTY_RANGE < 1023
 
 # Note that soft-reboots don't reset PWM values.
 a1n1.freq(FREQUENCY)
@@ -75,21 +78,21 @@ a1n2.duty(0)
 DELAY = 2  # 2ms
 
 speed = 0
-dir = 1
+_dir = 1  # Underscore used to avoid clash with existing global with same name.
 pin = a1n1
 
 # Functions for controlling the speed and direction of the motor.
 
 
-def speed_to_duty(speed):
-    return int((MAX_DUTY - MIN_DUTY) * speed / 100 + MIN_DUTY)
+def speed_to_duty(_speed):
+    return int(DUTY_RANGE * _speed / 100 + MIN_DUTY)
 
 
 def reverse():
-    global dir, pin
+    global _dir, pin
     current = speed
     set_speed(0)
-    dir *= -1
+    _dir *= -1
     pin = a1n1 if pin == a1n2 else a1n2
     set_speed(current)
 
