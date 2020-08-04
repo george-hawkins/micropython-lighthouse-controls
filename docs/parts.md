@@ -39,7 +39,7 @@ Bolts and threadlocker
 
 * M2 10mm bolts with corresponding nuts (something like [these](https://www.conrad.com/p/toolcraft-827129-fillister-head-screws-m2-10-mm-phillips-din-7985-steel-zinc-galvanized-100-pcs-827129) with these [nuts](https://www.conrad.com/p/toolcraft-815608-hexagonal-nuts-m2-din-934-steel-zinc-plated-100-pcs-815608)) - for attaching the tin can to the motor pulley.
 * 2.5x16mm round-headed wood screws (something like [these](https://www.homebase.co.uk/wood-screw-round-head-brass-3-x-12mm-10-pack_p168370) but different dimensions) - for attaching the metal frame to the base.
-* M3 25mm bolts with corresponding nuts (something like [these](https://www.conrad.com/p/toolcraft-827136-fillister-head-screws-m3-25-mm-phillips-din-7985-steel-zinc-galvanized-100-pcs-827136) with these [nuts](https://www.conrad.com/p/toolcraft-815624-hexagonal-nuts-m3-din-934-steel-zinc-plated-100-pcs-815624)) - for bolting the motor to the frame.
+* M2.5 25mm bolts with corresponding nuts (something like [these](https://www.conrad.com/p/toolcraft-145896-fillister-head-screws-m25-25-mm-phillips-din-7985-steel-zinc-galvanized-200-pcs-145896) with these [nuts](https://www.conrad.com/p/toolcraft-815616-hexagonal-nuts-m25-din-934-steel-zinc-plated-100-pcs-815616)) - for bolting the motor to the frame.
 * Loctite 243 threadlocker - to prevent bolts from rattling loose due to motor vibration.
 
 Note that Loctite 243 isn't so strong that you can't subsequently undo the bolts (there are stronger threadlocker formulations which are essentially permanent).
